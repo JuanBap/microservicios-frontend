@@ -1,6 +1,6 @@
 export async function GET(request, { params }) {
   try {
-    const response = await fetch(`https://true-urgently-horse.ngrok-free.app/courses/${params.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_COURSES_API_URL}/courses/${params.id}`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json',
@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   try {
     const body = await request.json();
-    const response = await fetch(`https://true-urgently-horse.ngrok-free.app/courses/${params.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_COURSES_API_URL}/courses/${params.id}`, {
       method: 'PATCH',
       headers: {
         'ngrok-skip-browser-warning': 'true',
@@ -46,7 +46,7 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const response = await fetch(`https://true-urgently-horse.ngrok-free.app/courses/${params.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_COURSES_API_URL}/courses/${params.id}`, {
       method: 'DELETE',
       headers: {
         'ngrok-skip-browser-warning': 'true',

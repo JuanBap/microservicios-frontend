@@ -14,6 +14,7 @@ import { apiServiceProxy as apiService } from '@/lib/api-proxy'
 export default function EnrollmentsPage() {
   const [enrollments, setEnrollments] = useState([])
   const [courses, setCourses] = useState([])
+  const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
@@ -35,16 +36,27 @@ export default function EnrollmentsPage() {
     try {
       setLoading(true)
       setError(null)
-      const [enrollmentsData, coursesData] = await Promise.all([
-        apiService.getEnrollments(),
-        apiService.getCourses()
-      ])
+      
+      // Hacer las llamadas de forma individual para mejor manejo de errores
+      const enrollmentsData = await apiService.getEnrollments()
+      const coursesData = await apiService.getCourses()
+      const studentsData = await apiService.getStudents(1, 100, true)
+      
       setEnrollments(Array.isArray(enrollmentsData) ? enrollmentsData : [])
       setCourses(Array.isArray(coursesData) ? coursesData : [])
+      setStudents(Array.isArray(studentsData) ? studentsData : [])
+      
+      console.log('Data loaded:', {
+        enrollments: enrollmentsData?.length || 0,
+        courses: coursesData?.length || 0,
+        students: studentsData?.length || 0
+      })
     } catch (err) {
+      console.error('Error fetching data:', err)
       setError(err.message)
       setEnrollments([])
       setCourses([])
+      setStudents([])
     } finally {
       setLoading(false)
     }
@@ -105,13 +117,24 @@ export default function EnrollmentsPage() {
     return course ? course.title : 'Curso no encontrado'
   }
 
+  const getStudentName = (studentId) => {
+    const student = students.find(s => s.id === studentId)
+    return student ? student.name : 'Estudiante no encontrado'
+  }
+
   const filteredEnrollments = enrollments.filter(enrollment => {
     const matchesFilter = filter === 'all' || 
       (filter === 'active' && enrollment.status === 'active') || 
       (filter === 'cancelled' && enrollment.status === 'cancelled')
     
     const courseTitle = getCourseTitle(enrollment.course_id).toLowerCase()
+    const studentName = getStudentName(enrollment.student_id).toLowerCase()
+    const student = students.find(s => s.id === enrollment.student_id)
+    const studentEmail = student ? student.email.toLowerCase() : ''
+    
     const matchesSearch = courseTitle.includes(searchTerm.toLowerCase()) ||
+      studentName.includes(searchTerm.toLowerCase()) ||
+      studentEmail.includes(searchTerm.toLowerCase()) ||
       enrollment.student_id.toLowerCase().includes(searchTerm.toLowerCase())
     
     return matchesFilter && matchesSearch
@@ -157,7 +180,7 @@ export default function EnrollmentsPage() {
           <div className="mb-6 flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <Input
-                placeholder="Buscar por estudiante o curso..."
+                placeholder="Buscar por nombre, email o curso..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="max-w-sm"
@@ -189,14 +212,27 @@ export default function EnrollmentsPage() {
                     {!editingEnrollment && (
                       <>
                         <div>
-                          <Label htmlFor="studentId">ID del Estudiante *</Label>
-                          <Input
-                            id="studentId"
+                          <Label htmlFor="studentId">Estudiante *</Label>
+                          <Select
                             value={formData.studentId}
-                            onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                            placeholder="UUID del estudiante"
-                            required
-                          />
+                            onValueChange={(value) => setFormData({ ...formData, studentId: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un estudiante" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {students.map((student) => (
+                                <SelectItem key={student.id} value={student.id}>
+                                  {student.name} - {student.email}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {students.length === 0 && (
+                            <p className="text-sm text-gray-500 mt-1">
+                              No hay estudiantes disponibles. Asegúrate de que el servicio de estudiantes esté funcionando.
+                            </p>
+                          )}
                         </div>
                         
                         <div>
@@ -270,7 +306,8 @@ export default function EnrollmentsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>ID Estudiante</TableHead>
+                      <TableHead>Estudiante</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead>Curso</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead>Fecha de Inscripción</TableHead>
@@ -278,41 +315,47 @@ export default function EnrollmentsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredEnrollments.map((enrollment) => (
-                      <TableRow key={enrollment.id}>
-                        <TableCell className="font-mono text-sm">
-                          {enrollment.student_id}
-                        </TableCell>
-                        <TableCell>{getCourseTitle(enrollment.course_id)}</TableCell>
-                        <TableCell>
-                          <Badge variant={enrollment.status === 'active' ? 'default' : 'destructive'}>
-                            {enrollment.status === 'active' ? 'Activa' : 'Cancelada'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(enrollment.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEdit(enrollment)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDelete(enrollment.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {filteredEnrollments.map((enrollment) => {
+                      const student = students.find(s => s.id === enrollment.student_id);
+                      return (
+                        <TableRow key={enrollment.id}>
+                          <TableCell className="font-medium">
+                            {student ? student.name : 'Estudiante no encontrado'}
+                          </TableCell>
+                          <TableCell className="text-sm text-gray-500">
+                            {student ? student.email : enrollment.student_id.slice(0, 8)}...
+                          </TableCell>
+                          <TableCell>{getCourseTitle(enrollment.course_id)}</TableCell>
+                          <TableCell>
+                            <Badge variant={enrollment.status === 'active' ? 'default' : 'destructive'}>
+                              {enrollment.status === 'active' ? 'Activa' : 'Cancelada'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(enrollment.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEdit(enrollment)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDelete(enrollment.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}

@@ -4,7 +4,7 @@ export async function GET(request) {
     const studentId = searchParams.get('studentId');
     const courseId = searchParams.get('courseId');
     
-    let url = 'https://true-urgently-horse.ngrok-free.app/enrollments';
+    let url = `${process.env.NEXT_PUBLIC_COURSES_API_URL}/enrollments`;
     const params = new URLSearchParams();
     if (studentId) params.append('studentId', studentId);
     if (courseId) params.append('courseId', courseId);
@@ -34,7 +34,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const response = await fetch('https://true-urgently-horse.ngrok-free.app/enrollments', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_COURSES_API_URL}/enrollments`, {
       method: 'POST',
       headers: {
         'ngrok-skip-browser-warning': 'true',

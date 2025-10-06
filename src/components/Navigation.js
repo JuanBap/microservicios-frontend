@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpen, Users, Home } from 'lucide-react'
+import { BookOpen, Users, Home, GraduationCap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const Navigation = () => {
@@ -18,6 +18,11 @@ const Navigation = () => {
       name: 'Cursos',
       href: '/courses',
       icon: BookOpen,
+    },
+    {
+      name: 'Estudiantes',
+      href: '/students',
+      icon: GraduationCap,
     },
     {
       name: 'Inscripciones',

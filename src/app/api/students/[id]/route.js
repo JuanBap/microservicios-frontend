@@ -1,8 +1,7 @@
 export async function GET(request, { params }) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_COURSES_API_URL}/enrollments/${params.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_STUDENTS_API_URL}/students/${params.id}`, {
       headers: {
-        'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json',
       },
     });
@@ -14,7 +13,7 @@ export async function GET(request, { params }) {
     const data = await response.json();
     return Response.json(data);
   } catch (error) {
-    console.error('Proxy API error:', error);
+    console.error('Students API error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
@@ -22,10 +21,9 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   try {
     const body = await request.json();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_COURSES_API_URL}/enrollments/${params.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_STUDENTS_API_URL}/students/${params.id}`, {
       method: 'PATCH',
       headers: {
-        'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
@@ -39,17 +37,16 @@ export async function PATCH(request, { params }) {
     const data = await response.json();
     return Response.json(data);
   } catch (error) {
-    console.error('Proxy API error:', error);
+    console.error('Students API error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_COURSES_API_URL}/enrollments/${params.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_STUDENTS_API_URL}/students/${params.id}`, {
       method: 'DELETE',
       headers: {
-        'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json',
       },
     });
@@ -60,7 +57,7 @@ export async function DELETE(request, { params }) {
 
     return Response.json({ success: true });
   } catch (error) {
-    console.error('Proxy API error:', error);
+    console.error('Students API error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }

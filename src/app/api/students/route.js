@@ -1,16 +1,17 @@
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
+    const page = searchParams.get('page') || '1';
+    const limit = searchParams.get('limit') || '100'; // Más registros para el dropdown
     const isActive = searchParams.get('isActive');
     
-    let url = `${process.env.NEXT_PUBLIC_COURSES_API_URL}/courses`;
+    let url = `${process.env.NEXT_PUBLIC_STUDENTS_API_URL}/students?page=${page}&limit=${limit}`;
     if (isActive !== null) {
-      url += `?isActive=${isActive}`;
+      url += `&isActive=${isActive}`;
     }
 
     const response = await fetch(url, {
       headers: {
-        'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json',
       },
     });
@@ -22,7 +23,7 @@ export async function GET(request) {
     const data = await response.json();
     return Response.json(data);
   } catch (error) {
-    console.error('Proxy API error:', error);
+    console.error('Students API error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
@@ -30,10 +31,9 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_COURSES_API_URL}/courses`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_STUDENTS_API_URL}/students`, {
       method: 'POST',
       headers: {
-        'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
@@ -47,7 +47,7 @@ export async function POST(request) {
     const data = await response.json();
     return Response.json(data);
   } catch (error) {
-    console.error('Proxy API error:', error);
+    console.error('Students API error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }

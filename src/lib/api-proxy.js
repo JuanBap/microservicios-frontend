@@ -12,13 +12,14 @@ class ApiServiceProxy {
       ...options,
     };
 
-    console.log('Making proxy request to:', url);
+    // console.log('Making proxy request to:', url);
 
     try {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.warn(`API request failed with status ${response.status} for ${url}`);
+        return [];
       }
       
       return await response.json();
@@ -104,6 +105,44 @@ class ApiServiceProxy {
 
   async deleteEnrollment(id) {
     return this.request(`/enrollments/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Students
+  async getStudents(page = 1, limit = 100, isActive = null) {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    if (isActive !== null) params.append('isActive', isActive.toString());
+    const queryString = params.toString();
+    return this.request(`/students?${queryString}`);
+  }
+
+  async getStudent(id) {
+    return this.request(`/students/${id}`);
+  }
+
+  async searchStudentByEmail(email) {
+    return this.request(`/students/search?email=${encodeURIComponent(email)}`);
+  }
+
+  async createStudent(studentData) {
+    return this.request('/students', {
+      method: 'POST',
+      body: JSON.stringify(studentData),
+    });
+  }
+
+  async updateStudent(id, studentData) {
+    return this.request(`/students/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(studentData),
+    });
+  }
+
+  async deleteStudent(id) {
+    return this.request(`/students/${id}`, {
       method: 'DELETE',
     });
   }
