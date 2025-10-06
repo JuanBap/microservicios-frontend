@@ -153,17 +153,17 @@ export default function EnrollmentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="py-6 sm:px-0">
           <div className="mb-8">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Gestión de Inscripciones</h1>
                 <p className="mt-2 text-gray-600">
                   Administra todas las inscripciones de estudiantes
                 </p>
               </div>
-              <Button onClick={() => setShowForm(true)}>
+              <Button onClick={() => setShowForm(true)} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Nueva Inscripción
               </Button>
@@ -177,17 +177,17 @@ export default function EnrollmentsPage() {
           )}
 
           {/* Filters */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-end gap-4">
+            <div className="sm:flex-1">
               <Input
                 placeholder="Buscar por nombre, email o curso..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm"
+                className="w-full sm:max-w-sm"
               />
             </div>
             <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
@@ -201,7 +201,7 @@ export default function EnrollmentsPage() {
           {/* Form Modal */}
           {showForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <Card className="w-full max-w-md">
+              <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <CardHeader>
                   <CardTitle>
                     {editingEnrollment ? 'Editar Inscripción' : 'Nueva Inscripción'}
@@ -274,11 +274,11 @@ export default function EnrollmentsPage() {
                       </div>
                     )}
                     
-                    <div className="flex justify-end space-x-2">
-                      <Button type="button" variant="outline" onClick={handleCancel}>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-2">
+                      <Button type="button" variant="outline" onClick={handleCancel} className="w-full sm:w-auto">
                         Cancelar
                       </Button>
-                      <Button type="submit">
+                      <Button type="submit" className="w-full sm:w-auto">
                         {editingEnrollment ? 'Actualizar' : 'Crear'}
                       </Button>
                     </div>
@@ -303,27 +303,28 @@ export default function EnrollmentsPage() {
                   <p className="text-gray-500">No se encontraron inscripciones</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Estudiante</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Curso</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Fecha de Inscripción</TableHead>
-                      <TableHead>Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredEnrollments.map((enrollment) => {
+                <div className="overflow-x-auto">
+                  <Table className="min-w-[760px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Estudiante</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Curso</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="hidden md:table-cell">Fecha de Inscripción</TableHead>
+                        <TableHead>Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredEnrollments.map((enrollment) => {
                       const student = students.find(s => s.id === enrollment.student_id);
                       return (
                         <TableRow key={enrollment.id}>
                           <TableCell className="font-medium">
                             {student ? student.name : 'Estudiante no encontrado'}
                           </TableCell>
-                          <TableCell className="text-sm text-gray-500">
-                            {student ? student.email : enrollment.student_id.slice(0, 8)}...
+                          <TableCell className="text-sm text-gray-500 max-w-[200px] truncate md:max-w-none">
+                            {student ? student.email : `${enrollment.student_id.slice(0, 8)}...`}
                           </TableCell>
                           <TableCell>{getCourseTitle(enrollment.course_id)}</TableCell>
                           <TableCell>
@@ -331,11 +332,11 @@ export default function EnrollmentsPage() {
                               {enrollment.status === 'active' ? 'Activa' : 'Cancelada'}
                             </Badge>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="hidden md:table-cell">
                             {new Date(enrollment.created_at).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            <div className="flex space-x-2">
+                            <div className="flex gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -355,9 +356,10 @@ export default function EnrollmentsPage() {
                           </TableCell>
                         </TableRow>
                       );
-                    })}
-                  </TableBody>
-                </Table>
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>

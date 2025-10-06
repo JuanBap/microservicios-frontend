@@ -121,17 +121,17 @@ export default function CoursesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="py-6 sm:px-0">
           <div className="mb-8">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Gestión de Cursos</h1>
                 <p className="mt-2 text-gray-600">
                   Administra todos los cursos del sistema
                 </p>
               </div>
-              <Button onClick={() => setShowForm(true)}>
+              <Button onClick={() => setShowForm(true)} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Curso
               </Button>
@@ -145,17 +145,17 @@ export default function CoursesPage() {
           )}
 
           {/* Filters */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-end gap-4">
+            <div className="sm:flex-1">
               <Input
                 placeholder="Buscar cursos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm"
+                className="w-full sm:max-w-sm"
               />
             </div>
             <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
@@ -169,7 +169,7 @@ export default function CoursesPage() {
           {/* Form Modal */}
           {showForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <Card className="w-full max-w-md">
+              <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <CardHeader>
                   <CardTitle>
                     {editingCourse ? 'Editar Curso' : 'Nuevo Curso'}
@@ -221,11 +221,11 @@ export default function CoursesPage() {
                       <Label htmlFor="is_active">Curso activo</Label>
                     </div>
                     
-                    <div className="flex justify-end space-x-2">
-                      <Button type="button" variant="outline" onClick={handleCancel}>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-2">
+                      <Button type="button" variant="outline" onClick={handleCancel} className="w-full sm:w-auto">
                         Cancelar
                       </Button>
-                      <Button type="submit">
+                      <Button type="submit" className="w-full sm:w-auto">
                         {editingCourse ? 'Actualizar' : 'Crear'}
                       </Button>
                     </div>
@@ -250,56 +250,58 @@ export default function CoursesPage() {
                   <p className="text-gray-500">No se encontraron cursos</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Título</TableHead>
-                      <TableHead>Descripción</TableHead>
-                      <TableHead>Precio</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Fecha de Creación</TableHead>
-                      <TableHead>Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCourses.map((course) => (
-                      <TableRow key={course.id}>
-                        <TableCell className="font-medium">{course.title}</TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {course.description || 'Sin descripción'}
-                        </TableCell>
-                        <TableCell>${course.price?.toFixed(2) || '0.00'}</TableCell>
-                        <TableCell>
-                          <Badge variant={course.is_active ? 'default' : 'secondary'}>
-                            {course.is_active ? 'Activo' : 'Inactivo'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(course.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEdit(course)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDelete(course.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table className="min-w-[720px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Título</TableHead>
+                        <TableHead className="max-w-xs">Descripción</TableHead>
+                        <TableHead>Precio</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="hidden md:table-cell">Fecha de Creación</TableHead>
+                        <TableHead>Acciones</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredCourses.map((course) => (
+                        <TableRow key={course.id}>
+                          <TableCell className="font-medium">{course.title}</TableCell>
+                          <TableCell className="max-w-[200px] truncate md:max-w-none">
+                            {course.description || 'Sin descripción'}
+                          </TableCell>
+                          <TableCell>${course.price?.toFixed(2) || '0.00'}</TableCell>
+                          <TableCell>
+                            <Badge variant={course.is_active ? 'default' : 'secondary'}>
+                              {course.is_active ? 'Activo' : 'Inactivo'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {new Date(course.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEdit(course)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDelete(course.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>
